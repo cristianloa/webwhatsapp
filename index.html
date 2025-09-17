@@ -9,17 +9,17 @@
         body {
             font-family: 'Arial', sans-serif;
         }
-        #browserFrame {
-            width: 100%;
-            height: 80vh;
-            border: none;
-            display: none;
-        }
         #urlContainer {
             transition: all 0.3s ease;
         }
         #showButton {
             display: none;
+        }
+        #statusMessage {
+            display: none;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
         }
     </style>
 </head>
@@ -31,7 +31,7 @@
                 type="text" 
                 value="https://web.whatsapp.com/" 
                 class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="Ingresa una URL"
+                placeholder="Ingresa una URL (ej. https://web.whatsapp.com/)"
             >
             <button 
                 id="toggleButton" 
@@ -56,42 +56,71 @@
     >
         Mostrar
     </button>
-    <div id="frameContainer" class="w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden">
-        <iframe id="browserFrame" src=""></iframe>
-    </div>
+    <div id="statusMessage" class="w-full max-w-2xl bg-yellow-100 text-yellow-800 p-4 rounded-lg"></div>
 
     <script>
         function openUrl() {
             const urlInput = document.getElementById('urlInput').value;
-            const browserFrame = document.getElementById('browserFrame');
-            const validUrl = urlInput.startsWith('http://') || urlInput.startsWith('https://') ? urlInput : 'https://' + urlInput;
+            const statusMessage = document.getElementById('statusMessage');
+            let validUrl = urlInput.trim();
 
-            // Forzar user agent de escritorio
+            // Validar y corregir URL
+            if (!validUrl) {
+                statusMessage.textContent = 'Error: Ingresa una URL válida.';
+                statusMessage.style.display = 'block';
+                return;
+            }
+            if (!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) {
+                validUrl = 'https://' + validUrl;
+            }
+
+            // Validar formato básico de URL
+            try {
+                new URL(validUrl);
+            } catch (e) {
+                statusMessage.textContent = 'Error: La URL ingresada no es válida. Ejemplo: https://web.whatsapp.com/';
+                statusMessage.style.display = 'block';
+                return;
+            }
+
+            // Forzar user agent de escritorio (limitado en algunos navegadores móviles)
             const desktopUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
             const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
             if (isMobile) {
-                // Intentar simular user agent de escritorio
-                Object.defineProperty(navigator, 'userAgent', {
-                    value: desktopUserAgent,
-                    writable: false
-                });
+                try {
+                    Object.defineProperty(navigator, 'userAgent', {
+                        value: desktopUserAgent,
+                        writable: false
+                    });
+                } catch (e) {
+                    statusMessage.textContent = 'Nota: No se pudo forzar modo escritorio en este navegador.';
+                    statusMessage.style.display = 'block';
+                }
             }
 
-            // Cargar la URL en el iframe
-            browserFrame.src = validUrl;
-            browserFrame.style.display = 'block';
+            // Redirigir a la URL en la misma pestaña
+            try {
+                statusMessage.textContent = 'Abriendo ' + validUrl + '...';
+                statusMessage.style.display = 'block';
+                window.location.href = validUrl;
+            } catch (e) {
+                statusMessage.textContent = 'Error al abrir la URL: ' + e.message;
+                statusMessage.style.display = 'block';
+            }
         }
 
         function toggleUrlBar() {
             const urlContainer = document.getElementById('urlContainer');
             const toggleButton = document.getElementById('toggleButton');
             const showButton = document.getElementById('showButton');
+            const statusMessage = document.getElementById('statusMessage');
 
             if (urlContainer.style.display === 'none') {
                 urlContainer.style.display = 'block';
                 toggleButton.textContent = 'Ocultar';
                 showButton.style.display = 'none';
+                statusMessage.style.display = 'none';
             } else {
                 urlContainer.style.display = 'none';
                 toggleButton.textContent = 'Mostrar';
