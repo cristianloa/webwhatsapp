@@ -1,1 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Web Desktop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full">
+        <h1 class="text-2xl font-bold mb-4 text-gray-800">WhatsApp Web en Modo Escritorio</h1>
+        <p class="text-gray-600 mb-6">Haz clic en el botón para abrir WhatsApp Web en modo escritorio.</p>
+        <button onclick="openWhatsApp()" class="bg-green-500 text-white px-6 py-3 rounded-full hover:bg-green-600 transition">
+            Abrir WhatsApp Web
+        </button>
+    </div>
 
+    <script>
+        function openWhatsApp() {
+            // Forzar user agent de escritorio
+            const desktopUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
+            const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
+            if (isMobile) {
+                // Crear un iframe para cargar WhatsApp Web con user agent de escritorio
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = 'https://web.whatsapp.com/';
+                document.body.appendChild(iframe);
+
+                // Simular user agent de escritorio (esto depende del navegador, no siempre funciona en todos los dispositivos)
+                Object.defineProperty(navigator, 'userAgent', {
+                    value: desktopUserAgent,
+                    writable: false
+                });
+
+                // Redirigir después de un pequeño retraso para asegurar la carga
+                setTimeout(() => {
+                    window.location.href = 'https://web.whatsapp.com/';
+                }, 500);
+            } else {
+                // Si ya está en escritorio, redirigir directamente
+                window.location.href = 'https://web.whatsapp.com/';
+            }
+        }
+    </script>
+</body>
+</html>
