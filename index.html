@@ -3,49 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp Web Desktop</title>
+    <title>Navegador en Modo Escritorio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
         }
+        #browserFrame {
+            width: 100%;
+            height: 80vh;
+            border: none;
+            display: none;
+        }
+        #urlContainer {
+            transition: all 0.3s ease;
+        }
+        #showButton {
+            display: none;
+        }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full">
-        <h1 class="text-2xl font-bold mb-4 text-gray-800">WhatsApp Web en Modo Escritorio</h1>
-        <p class="text-gray-600 mb-6">Haz clic en el botón para abrir WhatsApp Web en modo escritorio.</p>
-        <button onclick="openWhatsApp()" class="bg-green-500 text-white px-6 py-3 rounded-full hover:bg-green-600 transition">
-            Abrir WhatsApp Web
-        </button>
+<body class="bg-gray-100 flex flex-col items-center justify-start min-h-screen p-4">
+    <div id="urlContainer" class="bg-white p-4 rounded-lg shadow-lg w-full max-w-2xl mb-4">
+        <div class="flex flex-col sm:flex-row gap-2 items-center">
+            <input 
+                id="urlInput" 
+                type="text" 
+                value="https://web.whatsapp.com/" 
+                class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="Ingresa una URL"
+            >
+            <button 
+                id="toggleButton" 
+                onclick="toggleUrlBar()" 
+                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+                title="Ocultar barra de URL"
+            >
+                Ocultar
+            </button>
+            <button 
+                onclick="openUrl()" 
+                class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+            >
+                Abrir
+            </button>
+        </div>
+    </div>
+    <button 
+        id="showButton" 
+        onclick="toggleUrlBar()" 
+        class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+    >
+        Mostrar
+    </button>
+    <div id="frameContainer" class="w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden">
+        <iframe id="browserFrame" src=""></iframe>
     </div>
 
     <script>
-        function openWhatsApp() {
+        function openUrl() {
+            const urlInput = document.getElementById('urlInput').value;
+            const browserFrame = document.getElementById('browserFrame');
+            const validUrl = urlInput.startsWith('http://') || urlInput.startsWith('https://') ? urlInput : 'https://' + urlInput;
+
             // Forzar user agent de escritorio
             const desktopUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
             const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
             if (isMobile) {
-                // Crear un iframe para cargar WhatsApp Web con user agent de escritorio
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = 'https://web.whatsapp.com/';
-                document.body.appendChild(iframe);
-
-                // Simular user agent de escritorio (esto depende del navegador, no siempre funciona en todos los dispositivos)
+                // Intentar simular user agent de escritorio
                 Object.defineProperty(navigator, 'userAgent', {
                     value: desktopUserAgent,
                     writable: false
                 });
+            }
 
-                // Redirigir después de un pequeño retraso para asegurar la carga
-                setTimeout(() => {
-                    window.location.href = 'https://web.whatsapp.com/';
-                }, 500);
+            // Cargar la URL en el iframe
+            browserFrame.src = validUrl;
+            browserFrame.style.display = 'block';
+        }
+
+        function toggleUrlBar() {
+            const urlContainer = document.getElementById('urlContainer');
+            const toggleButton = document.getElementById('toggleButton');
+            const showButton = document.getElementById('showButton');
+
+            if (urlContainer.style.display === 'none') {
+                urlContainer.style.display = 'block';
+                toggleButton.textContent = 'Ocultar';
+                showButton.style.display = 'none';
             } else {
-                // Si ya está en escritorio, redirigir directamente
-                window.location.href = 'https://web.whatsapp.com/';
+                urlContainer.style.display = 'none';
+                toggleButton.textContent = 'Mostrar';
+                showButton.style.display = 'block';
             }
         }
     </script>
